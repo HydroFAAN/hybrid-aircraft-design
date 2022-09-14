@@ -66,6 +66,27 @@ while del>eps
     disp([num2str(i),'---',num2str(W0)])
 end
 
+%% Hydrogen Estimate
+
+MTOW2 = @(empty_ratio,fr) (W_pax+W_crew)/(1-fr-empty_ratio); % New Function that takes in fuel ratio as well
+W02 = 248479.1134;              % estimate from the first iterative process
+fuel2 = 29417.3;                % Calculated Hydrogen fuel
+fr = fuel2/W02;
+eps = 1e-6;
+del = 2*eps;
+disp(['Iterations',' | ','    MTOW   ',' | ','Empty Weight',' | ',' We/W0 ',' | ',' Wf/W0'])
+disp('----------------------------------------------------------------')
+while del>eps
+    e_w = reg_E(W02);    % Empty weight from guess using regression
+    er = e_w/W02;        % We/W0
+    W0_new = MTOW2(er,fr);
+    del = abs(W0_new-W02)/abs(W0_new);
+    fr = fuel2/W0_new;  % Recalculating the fuel ratio
+    W02 = W0_new;
+    i=i+1;
+    disp(['    ',num2str(i),'     ',' | ',num2str(W02),' | ',num2str(e_w),'  | ',num2str(er),' | ',num2str(fr)])
+end
+
 function fr = ratio(range,c,velocity,L_D)
     % Ratios taken from Roksham's table for jet transport
     start_warmup = 0.990;
