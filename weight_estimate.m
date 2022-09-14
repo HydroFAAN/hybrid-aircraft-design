@@ -54,8 +54,9 @@ MTOW = @(empty_ratio) (W_pax+W_crew)/(1-fuel_ratio-empty_ratio);
 W0 = 190000;
 eps = 1e-6;
 del = 2*eps;
-i=1;
-
+i=0;
+disp(['Iterations',' | ','    MTOW   ',' | ','Empty Weight',' | ',' We/W0 ',' | ',' Wf/W0'])
+disp('----------------------------------------------------------------')
 while del>eps
     e_w = reg_E(W0);    % Empty weight from guess using regression
     er = e_w/W0;        % We/W0
@@ -63,15 +64,14 @@ while del>eps
     del = abs(W0_new-W0)/abs(W0_new);
     W0 = W0_new;
     i=i+1;
-    disp([num2str(i),'---',num2str(W0)])
+    disp(['    ',num2str(i),'     ',' | ',num2str(W0),' | ',num2str(e_w),'  | ',num2str(er),' | ',num2str(fuel_ratio)])
 end
 
 %% Hydrogen Estimate
 
-MTOW2 = @(empty_ratio,fr) (W_pax+W_crew)/(1-fr-empty_ratio); % New Function that takes in fuel ratio as well
-W02 = 248479.1134;              % estimate from the first iterative process
-fuel2 = 29417.3;                % Calculated Hydrogen fuel
-fr = fuel2/W02;
+MTOW2 = @(empty_ratio,fr) (W_pax+W_crew)/(1-fr-empty_ratio);
+W02 = 248479.1134;
+fuel2 = 29700;
 eps = 1e-6;
 del = 2*eps;
 disp(['Iterations',' | ','    MTOW   ',' | ','Empty Weight',' | ',' We/W0 ',' | ',' Wf/W0'])
@@ -79,10 +79,10 @@ disp('----------------------------------------------------------------')
 while del>eps
     e_w = reg_E(W02);    % Empty weight from guess using regression
     er = e_w/W02;        % We/W0
+    fr = fuel2/W02;
     W0_new = MTOW2(er,fr);
     del = abs(W0_new-W02)/abs(W0_new);
-    fr = fuel2/W0_new;  % Recalculating the fuel ratio
-    W02 = W0_new;
+    W02 = 0.5*(W0_new+W02);
     i=i+1;
     disp(['    ',num2str(i),'     ',' | ',num2str(W02),' | ',num2str(e_w),'  | ',num2str(er),' | ',num2str(fr)])
 end
@@ -103,3 +103,6 @@ function fr = ratio(range,c,velocity,L_D)
     % fuel
     fr = (1-(start_warmup*Taxi*Takeoff*Climb*Cruise*Descent*Landing))*1.06; 
 end
+
+
+
