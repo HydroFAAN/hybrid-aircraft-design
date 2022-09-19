@@ -34,6 +34,7 @@ function W_estimate = weight_estimate(fig,print)
         loglog(x,y,linewidth=1.2)
         xlabel('MTOW',FontSize=13)
         ylabel('Empty Weight',FontSize=13)
+        legend('Historical Data','Regression Line')
         grid on
     end
 
@@ -45,7 +46,7 @@ function W_estimate = weight_estimate(fig,print)
     W_pax=pax*(pax_w+cargo);
     W_crew=crew*(pax_w+cargo);
     % Function takes in range(nmi), c, Velocity(knots) and L/D in that order
-    fuel_ratio = ratio(3270,0.6,400,17); 
+    fuel_ratio = ratio(3270,0.6,520,17); 
     % W0 equation from the metabook, takes emppty weight ratio as an input
     MTOW = @(empty_ratio) (W_pax+W_crew)/(1-fuel_ratio-empty_ratio); 
 
@@ -82,9 +83,9 @@ function W_estimate = weight_estimate(fig,print)
         disp('----------------------------------------------------------------')
     end
     while del>eps
-        e_w = reg_E(W02);    % Empty weight from guess using regression
-        er = e_w/W02;        % We/W0
-        fr = fuel2/W02;      % Wf/W0
+        e_w = reg_E(W02)*1.04;    % Empty weight from guess using regression (+4% for cryogenic storage of LH2) )
+        er = e_w/W02;             % We/W0
+        fr = fuel2/W02;           % Wf/W0
         W0_new = MTOW2(er,fr);
         del = abs(W0_new-W02)/abs(W0_new);
         W02 = (0.7*W0_new+0.3*W02);
@@ -118,7 +119,7 @@ function W_estimate = weight_estimate(fig,print)
 
     function lh2_fuel_lb = jet_to_lh2(W0,fuel_ratio)
         % Values taken from references [1][2][3]
-        rho_jet = 805;      rho_lh2 = 74;      % units - kg/m3
+        rho_jet = 805;      rho_lh2 = 71;      % units - kg/m3
         energy_jet = 36.9;    energy_lh2 = 9;    % units - MJ/l
         jet_fuel_lb = W0*fuel_ratio;
         jet_fuel_l = ((jet_fuel_lb/2.204)/rho_jet)*1e3;
@@ -127,3 +128,4 @@ function W_estimate = weight_estimate(fig,print)
         lh2_fuel_lb = lh2_fuel_l*1e-3*rho_lh2*2.204;
     end
 end
+
