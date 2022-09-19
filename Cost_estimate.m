@@ -25,8 +25,8 @@ function C_estimate = Cost_estimate(estimate,print)
     C_fuel = 1.02*estimate.Fuel_weight*(Pf/rho_f);
 
     Oil_weight = 0.0125*estimate.Fuel_weight*(tb/100);
-    Po = 27;
-    rho_o = 8.2;
+    Po = 151;
+    rho_o = 7.9;
     C_oil = 1.02*Oil_weight*(Po/rho_o);
 
     C_airport = 1.5*(estimate.MTOW/1000)*CEF;
@@ -36,7 +36,7 @@ function C_estimate = Cost_estimate(estimate,print)
 
     Engine_weight = 6775;
     Airframe_weight = estimate.Empty_weight-Engine_weight;
-    Rl = 7;
+    Rl = 7.25;
     C_ML = 1.03*(3+(0.067*Airframe_weight)/1000)*Rl;    % Labor Cost airframe
     C_MM = 1.03*(30*CEF)+0.79*1e-5*C_airframe;          % Material Cost airframe
     C_airframe_maintenance = (C_ML + C_MM)*tb;
