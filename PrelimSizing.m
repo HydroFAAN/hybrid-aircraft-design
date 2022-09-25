@@ -19,6 +19,9 @@ e3 = 0.70;  %oswald with landing flaps
 
 AR = 10.25; %Aspect Ratio
 
+% Function for calculating K value with 'e' as input for different phases of climb
+K = @(e) 1/(pi*AR*e);   
+
 % From table 4.2 in Metabook
 DelCD0_t = 0.015; % for DeltaCD0 takeoff
 DelCDO_l = 0.062; %for landing
@@ -29,20 +32,44 @@ CD0tg = CD0c + DelCD0_t + DelCDO_g;     %with takeoff flaps, gear down
 CD0l = CD0c + DelCDO_l;                 %with landing flaps, gear up
 CD0lg = CD0c + DelCDO_l + DelCDO_g;     %with landing flaps and gear down
 
+% CD values for the drag polars 
+CDc = CD0c + K(e1).*((CLc.^2));    % For Clean config
+CDt = CD0t + K(e2).*((CLt.^2));    % For takeoff flaps, gear up       
+CDtg = CD0tg + K(e2).*((CLt.^2));  % For takeoff flaps, gear down
+CDl = CD0l + K(e3).*((CLl.^2));    % For landing flaps, gear up
+CDlg = CD0lg + K(e3).*((CLl.^2));  % For landing flaps, gear down
 
-CDc = CD0c + (1/(pi*e1*AR)).*((CLc.^2)); %For 
-CDt = CD0t + (1/(pi*e2*AR)).*((CLt.^2));
-CDtg = CD0tg + (1/(pi*e2*AR)).*((CLt.^2));
-CDl = CD0l + (1/(pi*e3*AR)).*((CLl.^2));
-CDlg = CD0lg + (1/(pi*e3*AR)).*((CLl.^2));
+% Tangent point
+CL_tang = @(cd0,e) sqrt(cd0/K(e));
+CDc_tang = 2*K(e1)*(CL_tang(CD0c,e1))^2;
+CDt_tang = 2*K(e2)*(CL_tang(CD0t,e2))^2;
+CDtg_tang = 2*K(e2)*(CL_tang(CD0tg,e2))^2;
+CDl_tang = 2*K(e3)*(CL_tang(CD0l,e3))^2;
+CDlg_tang = 2*K(e3)*(CL_tang(CD0lg,e3))^2;
 
+% Max L/D ratios
+LD_c = CL_tang(CD0c,e1)/CDc_tang;
+LD_t = CL_tang(CD0t,e2)/CDt_tang;
+LD_tg = CL_tang(CD0tg,e2)/CDtg_tang;
+LD_l = CL_tang(CD0l,e3)/CDl_tang;
+LD_lg = CL_tang(CD0lg,e3)/CDlg_tang;
+
+% Plots figure
 figure(1)
 hold on
-plot(CDc,CLc)
-plot(CDt,CLt)
-plot(CDtg,CLt)
-plot(CDl,CLl)
-plot(CDlg,CLl)
+plot(CDc,CLc,'LineWidth',1.2)
+plot(CDt,CLt,'LineWidth',1.2)
+plot(CDtg,CLt,'LineWidth',1.2)
+plot(CDl,CLl,'LineWidth',1.2)
+plot(CDlg,CLl,'LineWidth',1.2)
+
+% Tangent Lines
+% plot([0,CDc_tang],[0,CL_tang(CD0c,e1)])
+% plot([0,CDt_tang],[0,CL_tang(CD0t,e2)])
+% plot([0,CDtg_tang],[0,CL_tang(CD0tg,e2)])
+% plot([0,CDl_tang],[0,CL_tang(CD0l,e3)])
+% plot([0,CDlg_tang],[0,CL_tang(CD0lg,e3)])
+
 title('Drag polars')
 xlabel('C_D')
 ylabel('C_L')
@@ -70,7 +97,6 @@ Wto_S = WL_S/WL_Wto;
 
 % Climb Chart
 n_engines = 2;
-K = @(e) 1/(pi*AR*e);   % Function for calculating K value with 'e' as input for different phases of climb
 
 % Function to calculate T/W for different climb phases
 % Inputs: 
@@ -141,19 +167,33 @@ end
 
 figure(2)
 hold on
-plot(W_S,T_W_takeoff)           % Takeoff plot
-xline(Wto_S)                    % Landing plot
-yline(TW_takeoff_climb)         % takeoff_climb
-yline(TW_transition_climb)      % transition_climb
-yline(TW_2segment_climb)        % second segment_climb
-yline(TW_enroute_climb)         % enroute_climb
-yline(TW_AEObalked_climb)       % AEObalked_climb
-yline(TW_OEIbalked_climb)       % OEIbalked_climb
-plot(W_S,Tto_Wto)               % Cruise plot
-yline(Tce_Wce)                  % Ceiling plot
+plot(W_S,T_W_takeoff,'r','LineWidth',1.2)           % Takeoff plot
+text(30,0.09,'Takeoff Field Length','Color','r')
+xline(Wto_S,'g','LineWidth',1.2)                    % Landing plot
+text(Wto_S+2,0.35,'Landing Field Length','Color','g')
+yline(TW_takeoff_climb,'c','LineWidth',1.1)         % takeoff_climb
+text(Wto_S+1,TW_takeoff_climb-0.006,'Takeoff Climb','Color','c')
+yline(TW_transition_climb,'m','LineWidth',1.1)      % transition_climb
+text(Wto_S+1,TW_transition_climb-0.006,'Transition Climb','Color','m')
+yline(TW_2segment_climb,'y','LineWidth',1.1)        % second segment_climb
+text(Wto_S+1,TW_2segment_climb+0.008,'Second segment Climb','Color','y')
+yline(TW_enroute_climb,'y','LineWidth',1.1)         % enroute_climb
+text(Wto_S+1,TW_enroute_climb-0.006,'Enroute Climb','Color','y')
+yline(TW_AEObalked_climb,'r','LineWidth',1.1)       % AEObalked_climb
+text(Wto_S+1,TW_AEObalked_climb-0.006,'AEO balked Climb','Color','r')
+yline(TW_OEIbalked_climb,'k','LineWidth',1.1)       % OEIbalked_climb
+text(Wto_S+1,TW_OEIbalked_climb-0.006,'OEI balked Climb','Color','k')
+plot(W_S,Tto_Wto,'b','LineWidth',1.2)               % Cruise plot
+text(10,0.4,'Cruise','Color','b')
+yline(Tce_Wce,'k','LineWidth',1.1)                  % Ceiling plot
+text(Wto_S+1,Tce_Wce-0.006,'Ceiling','Color','k')
 ylim([0,0.5])
-patch([W_S fliplr(W_S)], [AA max(ylim)*ones(size(AA))], 'r')    % Feasible region shade
+patch([W_S fliplr(W_S)], [AA max(ylim)*ones(size(AA))], 'r','EdgeColor','none')    % Feasible region shade
 alpha(0.5)  % Transperancy of the shaded region
+text(60,0.4,'Feasible Region')
+plot(84,0.27,'.k')
+text(75,0.28,'Selected T/W and W/S')
 xlabel('W/S (lb/ft^2)','FontSize',15)
 ylabel('T/W','FontSize',15)
+grid on
 
