@@ -191,7 +191,7 @@ ylim([0,0.5])
 patch([W_S fliplr(W_S)], [AA max(ylim)*ones(size(AA))], 'r','EdgeColor','none')    % Feasible region shade
 alpha(0.5)  % Transperancy of the shaded region
 text(60,0.4,'Feasible Region')
-plot(84,0.27,'.k')
+plot(84,0.27,'.k')      % The selcted values of T/W and W/S
 text(75,0.28,'Selected T/W and W/S')
 xlabel('W/S (lb/ft^2)','FontSize',15)
 ylabel('T/W','FontSize',15)
