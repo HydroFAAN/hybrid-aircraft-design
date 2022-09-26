@@ -133,7 +133,7 @@ OEIbalked_correction = (1/0.8)*(n_engines/(n_engines-1))*(WL_Wto);
 TW_OEIbalked_climb = TW_OEIbalked_climb*OEIbalked_correction;
 
 % Cruise Chart
-Wcr_Wto = 0.990*0.990*0.995*0.980;      % Correction Ratio includes Start_warmup, Taxi, Takeoff and Climb
+Wcr_Wto = 1;                            % Correction Ratio is 1 since MTOW was used for enroute climb as well
 q = 232.43;                             % Calculated using online calculator, reference[2]
 Tto = 32160;                            % lbs
 rho_SL = 1.225; rho_cr = 0.364;         % kg/m^3 at Sea level and 36000ft cruise height
