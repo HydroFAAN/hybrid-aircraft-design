@@ -79,7 +79,7 @@ function [values,estimate] = prelim_TS(Weight_est1,prelim_size,constraints)
     text(1600,45000,'Feasible Region','FontSize',15)
     
     plot(S_new,T_new,'.k')  % The selected values for T/W and W/S.
-    text(S_new-40,T_new+1500,'Selected Thrust = 39000 lbs and Sref = 1270 ft^2')
+    text(S_new-40,T_new+1500,'Selected Thrust = 38500 lbs and Sref = 1270 ft^2')
 
     xlabel('S (ft^2)','FontSize',15)
     ylabel('T (lb)','FontSize',15)
@@ -87,5 +87,5 @@ function [values,estimate] = prelim_TS(Weight_est1,prelim_size,constraints)
     values = struct('Takeoff',T_takeoff,'Cruise',T_cruise,'Takeoff_climb',T_takeoff_climb,...
                     'Transition_segment',T_transition_segment,'Second_segment',T_second_segment,...
                     'Enroute_climb',T_enroute_climb,'AEO_balked',T_AEO_balked,'OEI_balked',...
-                    T_OEI_balked,'Ceiling',T_Ceiling,'Landing',S_landing);
+                    T_OEI_balked,'Ceiling',T_Ceiling,'Landing',S_landing,'T_design',T_new,'S_design',S_new);
 end
