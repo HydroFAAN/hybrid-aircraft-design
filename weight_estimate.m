@@ -23,10 +23,12 @@ function W_estimate = weight_estimate(fig,print)
     A=((M'*M)\M')*R;
 
     x = linspace(10^4,3*10^5,100);
+    
     % Regression equation to find the MTOW
     % reg_TO = @(val)10.^(A(1)+A(2)*log10(val)); % takes in empty weight gives MTOW
     reg_E = @(val)10.^((log10(val)-A(1))/A(2)); % takes in MTOW gives empty weight
     y = reg_E(x);
+    
     if fig==true
         scatter(MTOW,Empty,30,'filled')
         set(gca,'xscale','log','yscale','log')
@@ -45,8 +47,10 @@ function W_estimate = weight_estimate(fig,print)
     cargo=60;
     W_pax=pax*(pax_w+cargo);
     W_crew=crew*(pax_w+cargo);
-    % Function takes in range(nmi), c, Velocity(knots) and L/D in that order
+    
+    % Function takes in range(nmi), sfc, Velocity(knots) and L/D in that order
     fuel_ratio = ratio(3270,0.6,520,17); 
+    
     % W0 equation from the metabook, takes emppty weight ratio as an input
     MTOW = @(empty_ratio) (W_pax+W_crew)/(1-fuel_ratio-empty_ratio); 
 
@@ -67,7 +71,7 @@ function W_estimate = weight_estimate(fig,print)
         W0 = W0_new;
         i=i+1;
         if print==true
-            disp(['    ',num2str(i),'     ',' | ',num2str(W0),' | ',num2str(e_w),'  | ',num2str(er),' | ',num2str(fuel_ratio)])
+            disp(['    ',num2str(i),'      | ',num2str(W0),' | ',num2str(e_w),'  | ',num2str(er),' | ',num2str(fuel_ratio)])
         end
     end
 
@@ -84,8 +88,8 @@ function W_estimate = weight_estimate(fig,print)
     end
     while del>eps
         e_w = reg_E(W02)*1.04;    % Empty weight from guess using regression (+4% for cryogenic storage of LH2) )
-        er = e_w/W02;             % We/W0
-        fr = fuel2/W02;           % Wf/W0
+        er = e_w/W02;             % Update We/W0
+        fr = fuel2/W02;           % Update Wf/W0
         W0_new = MTOW2(er,fr);
         del = abs(W0_new-W02)/abs(W0_new);
         W02 = (0.7*W0_new+0.3*W02);
@@ -96,9 +100,9 @@ function W_estimate = weight_estimate(fig,print)
     end
     
     W_estimate = struct('MTOW',W02,'Fuel_weight',fuel2,'Empty_weight',e_w,...
-                        'pax_weight',W_pax,'crew_weight',W_crew);
+                        'pax_weight',W_pax,'crew_weight',W_crew,'Regression',reg_E,'MTOW_Eq',MTOW2);
     if print==true
-        disp(['MTOW - ',num2str(W02),' || Empty Weight - ',num2str(e_w),' || Fuel Weight - ',num2str(fuel2)])
+        disp(['MTOW - ',num2str(W02),' || Empty Weight - ',num2str(e_w),' || Fuel Weight - ',num2str(W02*fr)])
     end
     function fr = ratio(range,c,velocity,L_D)
         % Ratios taken from Roksham's table for jet transport
@@ -110,7 +114,7 @@ function W_estimate = weight_estimate(fig,print)
         Landing = 0.992;
 
         Cruise = exp(-(range*c)/(velocity*L_D)); % From Berguet range formula
-    %     Reserve = exp(-(range2*c2)/(velocity2*L_D2));
+        % Reserve = exp(-(range2*c2)/(velocity2*L_D2));
 
         % Multiplied 1.06 to take into account the reserve mission and trapped
         % fuel
